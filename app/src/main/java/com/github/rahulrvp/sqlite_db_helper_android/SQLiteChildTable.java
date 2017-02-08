@@ -1,8 +1,8 @@
 package com.github.rahulrvp.sqlite_db_helper_android;
 
 import com.github.rahulrvp.sqlite_db_helper.SQLiteBaseTable;
-import com.github.rahulrvp.sqlite_db_helper.SQLiteColumn;
-import com.github.rahulrvp.sqlite_db_helper.SQLiteTable;
+import com.github.rahulrvp.sqlite_db_helper.annotations.SQLiteColumn;
+import com.github.rahulrvp.sqlite_db_helper.annotations.SQLiteTable;
 
 /**
  * @author Rahul Raveendran V P
@@ -16,7 +16,7 @@ public class SQLiteChildTable extends SQLiteBaseTable {
     @SQLiteColumn(primaryKey = true)
     private int intValuePK;
 
-    @SQLiteColumn
+    @SQLiteColumn(unique = true)
     private String stringValue;
 
     @SQLiteColumn

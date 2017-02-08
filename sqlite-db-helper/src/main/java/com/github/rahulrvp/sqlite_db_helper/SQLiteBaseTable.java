@@ -2,6 +2,11 @@ package com.github.rahulrvp.sqlite_db_helper;
 
 import android.text.TextUtils;
 
+import com.github.rahulrvp.sqlite_db_helper.annotations.SQLiteColumn;
+import com.github.rahulrvp.sqlite_db_helper.annotations.SQLiteTable;
+import com.github.rahulrvp.sqlite_db_helper.types.SQLiteConstraint;
+import com.github.rahulrvp.sqlite_db_helper.types.SQLiteDataType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
@@ -12,25 +17,45 @@ import java.lang.reflect.Field;
  */
 
 public class SQLiteBaseTable {
+    private final String WHITE_SPACE = " ";
 
+    /**
+     * This method is responsible for processing the table's info and building the
+     * SQL query required for creating/updating the same.
+     * <p>
+     * Reference: <a href="https://www.sqlite.org/lang_createtable.html">https://www.sqlite.org/lang_createtable.html</a>
+     *
+     * @return a valid SQL query or empty string.
+     */
     public String buildQuery() {
         StringBuilder builder = new StringBuilder();
 
+        /**
+         * Process the table annotation.
+         */
         Annotation classAnnotation = getClass().getAnnotation(SQLiteTable.class);
         if (classAnnotation != null) {
             SQLiteTable table = (SQLiteTable) classAnnotation;
 
+            String tableName = table.tableName();
+            if (TextUtils.isEmpty(tableName)) {
+                tableName = getClass().getSimpleName();
+            }
+
             builder
                     .append(table.mode())
-                    .append(" ")
-                    .append(table.tableName());
+                    .append(WHITE_SPACE)
+                    .append(tableName);
         }
 
+        /**
+         * Process the fields.
+         */
         Field[] fields = getClass().getDeclaredFields();
         if (fields != null && fields.length > 0) {
 
             builder
-                    .append(" ")
+                    .append(WHITE_SPACE)
                     .append("(");
 
             for (Field field : fields) {
@@ -45,43 +70,51 @@ public class SQLiteBaseTable {
 
                     builder.append(columnName);
 
-                    // append data type
-                    // reference {@link https://www.sqlite.org/datatype3.html}
-                    String type = "INTEGER";
+                    /**
+                     * Append data-type and constraints
+                     *
+                     * Reference: <a href="https://www.sqlite.org/datatype3.html">https://www.sqlite.org/datatype3.html</a>
+                     */
+                    SQLiteDataType type = SQLiteDataType.INTEGER;
 
                     if (field.getType() == String.class) {
-                        type = "TEXT";
+                        type = SQLiteDataType.TEXT;
                     } else if (field.getType() == Double.class || field.getType() == Float.class) {
-                        type = "REAL";
+                        type = SQLiteDataType.REAL;
                     } else if (field.getType() == Object.class) {
-                        type = "BLOB";
+                        type = SQLiteDataType.BLOB;
                     }
 
-                    builder.append(" ").append(type);
+                    builder.append(WHITE_SPACE).append(type);
 
                     if (column.primaryKey()) {
-                        builder.append(" PRIMARY KEY");
-                    }
-
-                    if (column.autoIncrement()) {
-                        builder.append(" AUTO INCREMENT");
+                        builder.append(WHITE_SPACE).append(SQLiteConstraint.PRIMARY_KEY);
                     }
 
                     if (column.notNull()) {
-                        builder.append(" NOT NULL");
+                        builder.append(WHITE_SPACE).append(SQLiteConstraint.NOT_NULL);
+                    }
+
+                    if (column.unique()) {
+                        builder.append(WHITE_SPACE).append(SQLiteConstraint.UNIQUE);
+                    }
+
+                    if (column.autoIncrement()) {
+                        builder.append(WHITE_SPACE).append(SQLiteConstraint.AUTO_INCREMENT);
                     }
 
                     if (column.asc()) {
-                        builder.append(" ASC");
+                        builder.append(WHITE_SPACE).append(SQLiteConstraint.ASC);
                     }
 
-                    builder.append(",").append(" ");
+                    builder.append(",").append(WHITE_SPACE);
                 }
             }
 
             int commaIndex = builder.lastIndexOf(",");
-
-            builder.replace(commaIndex, builder.length(), "");
+            if (commaIndex != -1) {
+                builder.replace(commaIndex, builder.length(), "");
+            }
 
             builder.append(")");
         }

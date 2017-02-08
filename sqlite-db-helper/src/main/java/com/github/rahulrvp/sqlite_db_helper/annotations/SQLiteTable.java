@@ -1,4 +1,4 @@
-package com.github.rahulrvp.sqlite_db_helper;
+package com.github.rahulrvp.sqlite_db_helper.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

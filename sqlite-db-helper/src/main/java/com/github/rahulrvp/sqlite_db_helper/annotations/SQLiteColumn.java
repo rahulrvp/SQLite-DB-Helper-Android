@@ -1,4 +1,4 @@
-package com.github.rahulrvp.sqlite_db_helper;
+package com.github.rahulrvp.sqlite_db_helper.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,6 +18,8 @@ public @interface SQLiteColumn {
     String name() default "";
 
     boolean primaryKey() default false;
+
+    boolean unique() default false;
 
     boolean notNull() default false;
 
